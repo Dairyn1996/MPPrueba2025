@@ -1,0 +1,35 @@
+# Ignorar carpetas de módulos y build
+node_modules/
+frontend/node_modules/
+backend/node_modules/
+frontend/build/
+backend/build/ # Si tu backend genera una carpeta de build
+
+# Ignorar archivos de entorno sensibles y locales
+.env
+.env.local
+.env*.local
+*.env
+
+# Ignorar logs y cachés
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store # Archivos de macOS
+Thumbs.db # Archivos de Windows
+
+# Ignorar archivos específicos de sistemas operativos que no son de tu proyecto
+# Esto es crucial para tu error actual
+# Puede que necesites ajustar estas rutas si el archivo USS.jtx está en una subcarpeta más específica
+# Por ejemplo, si el error fue en C:\Users\dairy\ministerio-publico-prueba\AppData\...
+# Es poco probable que AppData esté dentro de tu proyecto, pero lo ponemos preventivamente
+# Si el archivo está fuera de tu proyecto, el .gitignore no lo afectará, pero el git add . no debería alcanzarlo.
+# Si lo está detectando es porque el git add . se está ejecutando desde C:\Users\dairy\
+# Revisa tu ubicación actual en la terminal antes de ejecutar git add .
+
+# Sin embargo, si estás en la raíz de tu proyecto y Git aún lo detecta, es que la ruta que te da
+# el error es relativa al directorio CWD de git y no al repositorio.
+# Pero por si acaso, podemos intentar ignorar patrones que se parezcan a esa ruta:
+**/UnistoreDB/
+**/USS.jtx

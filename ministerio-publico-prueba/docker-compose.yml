@@ -1,0 +1,58 @@
+version: '3.8'
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: mssql_db
+    ports:
+      - "1434:1434"
+    environment:
+      SA_PASSWORD: "MP#Prueba2025!" 
+      ACCEPT_EULA: "Y"
+    volumes:
+      - mssql_data:/var/opt/mssql # Persistencia de datos para la DB
+    healthcheck: # Monitorea si la DB está lista y acepta conexiones
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "SA", "-P", "MP#Prueba2025!", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend # Le dice a Docker Compose que construya la imagen desde el Dockerfile en la carpeta ./backend
+    container_name: node_backend
+    ports:
+      - "5000:5000" # Mapea el puerto 5000 del host al puerto 5000 del contenedor
+    environment:
+      DB_SERVER: db # El backend se conecta a la DB usando el nombre del servicio 'db' dentro de la red Docker
+      DB_DATABASE: MinisterioPublicoDB
+      DB_USER: SA 
+      DB_PASSWORD: MP#Prueba2025! 
+      DB_PORT: 1434
+      JWT_SECRET: MPaPrueba
+      PORT: 5000
+    depends_on:
+      db:
+        condition: service_healthy # El backend solo arranca cuando la DB está saludable
+    networks:
+      - app-network
+
+  frontend:
+    build: ./frontend # Le dice a Docker Compose que construya la imagen desde el Dockerfile en la carpeta ./frontend
+    container_name: react_frontend
+    ports:
+      - "80:80" # Mapea el puerto 80 del host (HTTP estándar) al puerto 80 del contenedor (donde Nginx sirve el frontend)
+    environment:
+      REACT_APP_API_URL: http://localhost:5000/api # El frontend (desde el navegador) necesita la URL del backend tal como la ve el navegador
+    depends_on:
+      - backend # El frontend arranca después del backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge # Define una red interna para que los servicios se comuniquen entre sí
+
+volumes:
+  mssql_data: # Define un volumen para la persistencia de los datos de SQL Server
